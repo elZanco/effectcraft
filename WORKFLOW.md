@@ -85,6 +85,19 @@ for release-sized changes, if at all.
   WSL tears down background processes when the launching wsl.exe exits, and a
   missing `.exe` suffix is normal — it is not a Windows binary.
 - A hung WSL: `taskkill /F /IM wsl.exe`, then start fresh.
+- **Line endings:** this repo is checked out with CRLF on Windows. The repo's
+  `.git/config` now has `core.autocrlf=true` so the WSL clone sees a clean
+  tree too; without it *every* file looks modified and `git checkout` of any
+  other branch aborts. After a fresh clone on a mixed Windows/WSL setup run
+  `git config core.autocrlf true` once.
+- **Long jobs: run them foreground, not detached.** A `Start-Process wsl.exe`
+  child dies with its PowerShell parent when a tool call times out, and that
+  tears the whole WSL VM down mid-build (the VM reboots, cargo is gone, the
+  log just stops). Instead run `wsl -e bash script.sh` as the single blocking
+  call with a generous timeout; the WSL VM survives and the job finishes.
+- **`WORKFLOW.md` is deleted on branch switches** while it is tracked on
+  `local/workflow`; restore it with
+  `git show local/workflow:WORKFLOW.md > WORKFLOW.md` (it stays untracked).
 
 ## Open PRs (status 2026-10-19)
 
